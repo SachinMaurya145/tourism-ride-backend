@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 
+import { swaggerUi, swaggerSpec } from './swagger';
 import authRoutes from './modules/auth/auth.routes';
 import userRoutes from './modules/users/user.routes';
 
@@ -19,5 +20,8 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // Routes
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
+
+// Swagger UI
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 export default app;

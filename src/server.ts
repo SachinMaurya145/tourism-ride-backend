@@ -23,7 +23,7 @@ async function start(): Promise<void> {
     initSocket(server);
   } catch (err) {
     console.error('Failed to start server:', err);
-    process.exit(1);
+    process.exit(1); //just stop the project.
   }
 }
 
