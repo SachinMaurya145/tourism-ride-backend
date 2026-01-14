@@ -6,7 +6,8 @@ export class AuthRepository {
   }
 
   findByEmail(email: string) {
-    return UserModel.findOne({ email });
+    // explicitly include `password` to ensure login has access to the hashed password
+    return UserModel.findOne({ email }).select('+password');
   }
 
   findById(id: string) {

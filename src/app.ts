@@ -6,6 +6,9 @@ import { swaggerUi, swaggerSpec } from './swagger';
 import authRoutes from './modules/auth/auth.routes';
 import userRoutes from './modules/users/user.routes';
 
+import { errorMiddleware } from './middlewares/error.middleware';
+import { HTTP_STATUS, HTTP_MESSAGE } from './utils/httpStatus';
+
 const app = express();
 
 // --------------------
@@ -20,7 +23,14 @@ app.use(morgan('dev'));
 // Health Check
 // --------------------
 app.get('/health', (_req, res) => {
-  res.json({ status: 'ok' });
+  res.status(HTTP_STATUS.OK).json({
+    success: true,
+    statusCode: HTTP_STATUS.OK,
+    path: '/health',
+    message: HTTP_MESSAGE.OK,
+    data: { status: 'ok' },
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // --------------------
@@ -35,5 +45,23 @@ app.use(`${API_V1}/users`, userRoutes);
 // Swagger Docs
 // --------------------
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+// --------------------
+// 404 Handler (IMPORTANT)
+// --------------------
+app.use((_req, res) => {
+  res.status(HTTP_STATUS.NOT_FOUND).json({
+    success: false,
+    statusCode: HTTP_STATUS.NOT_FOUND,
+    path: _req.originalUrl,
+    message: HTTP_MESSAGE.NOT_FOUND,
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// --------------------
+// Global Error Handler (MUST BE LAST)
+// --------------------
+app.use(errorMiddleware);
 
 export default app;

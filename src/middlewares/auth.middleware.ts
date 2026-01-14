@@ -1,15 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/jwt';
+import { ApiError } from '../utils/apiError';
+import { HTTP_STATUS } from '../utils/httpStatus';
 
 export const authMiddleware = (
   req: any,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader?.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'Unauthorized' });
+    throw new ApiError(HTTP_STATUS.UNAUTHORIZED, 'Unauthorized');
   }
 
   try {
@@ -17,7 +19,7 @@ export const authMiddleware = (
     const decoded = verifyToken(token);
     req.user = decoded;
     next();
-  } catch {
-    return res.status(401).json({ message: 'Invalid token' });
+  } catch (e) {
+    throw new ApiError(HTTP_STATUS.UNAUTHORIZED, 'Invalid or expired token');
   }
 };

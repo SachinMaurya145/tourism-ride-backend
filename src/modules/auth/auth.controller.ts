@@ -1,52 +1,45 @@
-import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { AuthRepository } from './auth.repository';
+import { asyncHandler } from '../../utils/asyncHandler';
+import { sendResponse } from '../../utils/apiResponse';
+import { HTTP_STATUS, HTTP_MESSAGE } from '../../utils/httpStatus';
+import { Request, Response } from 'express';
 
 const authService = new AuthService(new AuthRepository());
 
-// 1️⃣ SIGNUP
-export const signup = async (req: Request, res: Response) => {
+export const signup = asyncHandler(async (req: Request, res: Response): Promise<any> => {
   const user = await authService.signup(req.body);
 
-  res.status(201).json({
-    success: true,
-    message: 'Signup successful',
-    user
-  });
-};
+  sendResponse(
+    req,
+    res,
+    HTTP_STATUS.CREATED,
+    user,
+    HTTP_MESSAGE.CREATED
+  );
+});
 
+export const login = asyncHandler(async (req: Request, res: Response): Promise<any> => {
+  const { email, password } = req.body;
+  const data = await authService.login(email, password);
 
-// 2️⃣ LOGIN
-export const login = async (req: Request, res: Response) => {
-  try {
-    const { email, password } = req.body;
-    const data = await authService.login(email, password);
+  sendResponse(
+    req,
+    res,
+    HTTP_STATUS.OK,
+    data,
+    HTTP_MESSAGE.OK
+  );
+});
 
-    res.status(200).json({
-      success: true,
-      message: 'Login successful',
-      ...data
-    });
-  } catch (error: any) {
-    res.status(400).json({
-      success: false,
-      message: error.message
-    });
-  }
-};
+export const profile = asyncHandler(async (req: any, res: Response): Promise<any> => {
+  const user = await authService.profile(req.user.id);
 
-// 3️⃣ PROFILE
-export const profile = async (req: any, res: Response) => {
-  try {
-    const user = await authService.profile(req.user.id);
-    res.status(200).json({
-      success: true,
-      user
-    });
-  } catch (error: any) {
-    res.status(404).json({
-      success: false,
-      message: error.message
-    });
-  }
-};
+  sendResponse(
+    req,
+    res,
+    HTTP_STATUS.OK,
+    user,
+    HTTP_MESSAGE.OK
+  );
+});
