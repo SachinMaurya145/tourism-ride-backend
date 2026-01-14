@@ -1,20 +1,15 @@
-import type { IUser } from './auth.model';
-import { createUserObj } from './auth.model';
+import { UserModel, IUser } from './auth.model';
 
-// Very small in-memory store for stubs
-const users: IUser[] = [];
+export class AuthRepository {
+  create(data: Partial<IUser>) {
+    return UserModel.create(data);
+  }
 
-export async function createUser(data: Partial<IUser>): Promise<IUser> {
-  const id = String(users.length + 1);
-  const user = createUserObj({ ...data, id });
-  users.push(user);
-  return user;
-}
+  findByEmail(email: string) {
+    return UserModel.findOne({ email });
+  }
 
-export async function findByEmail(email: string): Promise<IUser | null> {
-  return users.find(u => u.email === email) || null;
-}
-
-export async function findById(id: string): Promise<IUser | null> {
-  return users.find(u => u.id === id) || null;
+  findById(id: string) {
+    return UserModel.findById(id).select('-password');
+  }
 }

@@ -8,20 +8,32 @@ import userRoutes from './modules/users/user.routes';
 
 const app = express();
 
-// Basic middleware
+// --------------------
+// Global Middleware
+// --------------------
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(morgan('dev'));
 
-// Health
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+// --------------------
+// Health Check
+// --------------------
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok' });
+});
 
-// Routes
-app.use('/auth', authRoutes);
-app.use('/users', userRoutes);
+// --------------------
+// API Versioning
+// --------------------
+const API_V1 = '/api/v1';
 
-// Swagger UI
+app.use(`${API_V1}/auth`, authRoutes);
+app.use(`${API_V1}/users`, userRoutes);
+
+// --------------------
+// Swagger Docs
+// --------------------
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 export default app;

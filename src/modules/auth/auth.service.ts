@@ -1,24 +1,49 @@
-import type { IUser } from './auth.model';
-import { createUser } from './auth.repository';
-import { findByEmail, findById } from './auth.repository';
+import bcrypt from 'bcrypt';
+import { AuthRepository } from './auth.repository';
+import { signToken } from '../../utils/jwt';
+import { mapUserToResponse } from './mappers/user.mapper';
 
-// Minimal service stubs (no real hashing or JWT)
-export async function register(name: string, email: string, _password: string) {
-  const existing = await findByEmail(email);
-  if (existing) throw new Error('User already exists');
+export class AuthService {
+  constructor(private repo: AuthRepository) {}
 
-  const user = await createUser({ name, email });
-  return { user, token: 'stub-token' };
-}
+  async signup(data: any) {
+    const existing = await this.repo.findByEmail(data.email);
+    if (existing) throw new Error('User already exists');
 
-export async function login(email: string, _password: string) {
-  const user = await findByEmail(email);
-  if (!user) throw new Error('Invalid credentials');
-  return { user, token: 'stub-token' };
-}
+    const hashedPassword = await bcrypt.hash(data.password, 10);
 
-export async function getProfile(userId: string) {
-  const user = await findById(userId);
-  if (!user) return null;
-  return user as IUser;
+    const user = await this.repo.create({
+      name: data.name,
+      email: data.email,
+      password: hashedPassword,
+      role: data.role || 'USER'
+    });
+
+    return mapUserToResponse(user); // 🔥 DTO returned
+  }
+
+  async login(email: string, password: string) {
+    const user = await this.repo.findByEmail(email);
+    if (!user) throw new Error('Invalid credentials');
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) throw new Error('Invalid credentials');
+
+    const token = signToken({
+      id: user._id,
+      role: user.role
+    });
+
+    return {
+      token,
+      user: mapUserToResponse(user)
+    };
+  }
+
+  async profile(userId: string) {
+    const user = await this.repo.findById(userId);
+    if (!user) throw new Error('User not found');
+
+    return mapUserToResponse(user);
+  }
 }

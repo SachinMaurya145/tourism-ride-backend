@@ -1,36 +1,52 @@
 import { Request, Response } from 'express';
-import * as AuthService from './auth.service';
+import { AuthService } from './auth.service';
+import { AuthRepository } from './auth.repository';
 
-export async function register(req: Request, res: Response) {
-  try {
-    const { name, email, password } = req.body;
-    const result = await AuthService.register(name, email, password);
-    res.status(201).json(result);
-  } catch (err: any) {
-    res.status(400).json({ message: err.message || 'Registration failed' });
-  }
-}
+const authService = new AuthService(new AuthRepository());
 
-export async function login(req: Request, res: Response) {
+// 1️⃣ SIGNUP
+export const signup = async (req: Request, res: Response) => {
+  const user = await authService.signup(req.body);
+
+  res.status(201).json({
+    success: true,
+    message: 'Signup successful',
+    user
+  });
+};
+
+
+// 2️⃣ LOGIN
+export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
-    const result = await AuthService.login(email, password);
-    res.json(result);
-  } catch (err: any) {
-    res.status(400).json({ message: err.message || 'Login failed' });
-  }
-}
+    const data = await authService.login(email, password);
 
-export async function me(req: Request, res: Response) {
+    res.status(200).json({
+      success: true,
+      message: 'Login successful',
+      ...data
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// 3️⃣ PROFILE
+export const profile = async (req: any, res: Response) => {
   try {
-    // middleware attaches user object: for stubs we expect { userId }
-    const userId = (req as any).user?.userId;
-    if (!userId) return res.status(401).json({ message: 'Unauthorized' });
-
-    const profile = await AuthService.getProfile(userId);
-    if (!profile) return res.status(404).json({ message: 'User not found' });
-    res.json(profile);
-  } catch (err: any) {
-    res.status(500).json({ message: 'Failed to fetch profile' });
+    const user = await authService.profile(req.user.id);
+    res.status(200).json({
+      success: true,
+      user
+    });
+  } catch (error: any) {
+    res.status(404).json({
+      success: false,
+      message: error.message
+    });
   }
-}
+};

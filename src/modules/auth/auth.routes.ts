@@ -1,11 +1,14 @@
 import { Router } from 'express';
-import * as AuthController from './auth.controller';
+import { signup, login, profile } from './auth.controller';
 import { authMiddleware } from '../../middlewares/auth.middleware';
 
 const router = Router();
 
-router.post('/register', AuthController.register);
-router.post('/login', AuthController.login);
-router.get('/me', authMiddleware, AuthController.me);
+// PUBLIC
+router.post('/signup', signup);
+router.post('/login', login);
+
+// PROTECTED
+router.get('/profile', authMiddleware, profile);
 
 export default router;
