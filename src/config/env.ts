@@ -18,6 +18,9 @@ export const env = {
   redisUrl: process.env.REDIS_URL ?? 'redis://localhost:6379',
 
   jwtSecret: required('JWT_SECRET'),
+  jwtRefreshSecret: required('JWT_REFRESH_SECRET'),
+  jwtAccessExpiry: process.env.JWT_ACCESS_EXPIRY ?? '15m',
+  jwtRefreshExpiry: process.env.JWT_REFRESH_EXPIRY ?? '7d',
 };
 
 export default env;

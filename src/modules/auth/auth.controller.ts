@@ -21,14 +21,60 @@ export const signup = asyncHandler(async (req: Request, res: Response): Promise<
 
 export const login = asyncHandler(async (req: Request, res: Response): Promise<any> => {
   const { email, password } = req.body;
-  const data = await authService.login(email, password);
+  const { accessToken, refreshToken, user } = await authService.login(email, password);
+
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
 
   sendResponse(
     req,
     res,
     HTTP_STATUS.OK,
-    data,
+    { accessToken, user },
     HTTP_MESSAGE.OK
+  );
+});
+
+export const refresh = asyncHandler(async (req: Request, res: Response): Promise<any> => {
+  const token = req.cookies.refreshToken;
+  if (!token) {
+    res.status(HTTP_STATUS.UNAUTHORIZED).json({
+      success: false,
+      message: 'Refresh token missing',
+    });
+    return;
+  }
+
+  const { accessToken } = await authService.refreshToken(token);
+
+  sendResponse(
+    req,
+    res,
+    HTTP_STATUS.OK,
+    { accessToken },
+    HTTP_MESSAGE.OK
+  );
+});
+
+export const logout = asyncHandler(async (req: any, res: Response): Promise<any> => {
+  await authService.logout(req.user.id);
+
+  res.clearCookie('refreshToken', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+  });
+
+  sendResponse(
+    req,
+    res,
+    HTTP_STATUS.OK,
+    null,
+    'Logged out successfully'
   );
 });
 

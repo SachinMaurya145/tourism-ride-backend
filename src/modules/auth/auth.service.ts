@@ -2,11 +2,11 @@ import bcrypt from 'bcrypt';
 import { AuthRepository } from './auth.repository';
 import { ApiError } from '../../utils/apiError';
 import { HTTP_STATUS, HTTP_MESSAGE } from '../../utils/httpStatus';
-import { signToken } from '../../utils/jwt';
+import { signAccessToken, signRefreshToken, verifyToken } from '../../utils/jwt';
 import { mapUserToResponse } from './mappers/user.mapper';
 
 export class AuthService {
-  constructor(private repo: AuthRepository) {}
+  constructor(private repo: AuthRepository) { }
 
   async signup(data: any) {
     const exists = await this.repo.findByEmail(data.email);
@@ -53,9 +53,14 @@ export class AuthService {
       );
     }
 
-    let token: string;
+    let accessToken: string;
+    let refreshToken: string;
     try {
-      token = signToken({ id: user._id, role: user.role });
+      accessToken = signAccessToken({ id: user._id, role: user.role });
+      refreshToken = signRefreshToken({ id: user._id, role: user.role });
+
+      // Save refresh token to DB
+      await this.repo.update(user._id.toString(), { refreshToken });
     } catch (e) {
       throw new ApiError(
         HTTP_STATUS.INTERNAL_SERVER_ERROR,
@@ -64,9 +69,37 @@ export class AuthService {
     }
 
     return {
-      token,
+      accessToken,
+      refreshToken,
       user: mapUserToResponse(user),
     };
+  }
+
+  async refreshToken(token: string) {
+    let payload: any;
+    try {
+      payload = verifyToken(token, true);
+    } catch (e) {
+      throw new ApiError(
+        HTTP_STATUS.UNAUTHORIZED,
+        'Invalid or expired refresh token'
+      );
+    }
+
+    const user = await this.repo.findById(payload.id);
+    if (!user || user.refreshToken !== token) {
+      throw new ApiError(
+        HTTP_STATUS.UNAUTHORIZED,
+        'Refresh token not found or mismatch'
+      );
+    }
+
+    const accessToken = signAccessToken({ id: user._id, role: user.role });
+    return { accessToken };
+  }
+
+  async logout(userId: string) {
+    await this.repo.update(userId, { refreshToken: undefined });
   }
 
   async profile(userId: string) {

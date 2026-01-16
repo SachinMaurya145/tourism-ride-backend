@@ -13,4 +13,8 @@ export class AuthRepository {
   findById(id: string) {
     return UserModel.findById(id).select('-password');
   }
+
+  update(id: string, data: Partial<IUser>) {
+    return UserModel.findByIdAndUpdate(id, data, { new: true });
+  }
 }
