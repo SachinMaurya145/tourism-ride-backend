@@ -1,9 +1,13 @@
 // User routes
 import { Router } from 'express';
+import { authMiddleware } from '@middlewares/auth.middleware';
 import { authorizeRoles } from '@middlewares/role.middleware';
 import { ROLES } from '@constants/roles';
 
 const router = Router();
+
+// Apply authentication to all user routes
+router.use(authMiddleware);
 
 // Example route: Get all users - Admin only
 router.get('/', authorizeRoles(ROLES.ADMIN, ROLES.SUPER_ADMIN), (req, res) => {
