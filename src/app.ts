@@ -3,12 +3,14 @@ import cors from 'cors';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 
-import { swaggerUi, swaggerSpec } from './swagger';
-import authRoutes from './modules/auth/auth.routes';
-import userRoutes from './modules/users/user.routes';
+import { swaggerUi, swaggerSpec } from '@swagger';
+import authRoutes from '@modules/auth/auth.routes';
+import userRoutes from '@modules/users/user.routes';
+import driverRoutes from '@modules/drivers/driver.routes';
+import adminRoutes from '@modules/admin/admin.routes';
 
-import { errorMiddleware } from './middlewares/error.middleware';
-import { HTTP_STATUS, HTTP_MESSAGE } from './utils/httpStatus';
+import { errorMiddleware } from '@middlewares/error.middleware';
+import { HTTP_STATUS, HTTP_MESSAGE } from '@utils/httpStatus';
 
 const app = express();
 
@@ -42,6 +44,8 @@ const API_V1 = '/api/v1';
 
 app.use(`${API_V1}/auth`, authRoutes);
 app.use(`${API_V1}/users`, userRoutes);
+app.use(`${API_V1}/drivers`, driverRoutes);
+app.use(`${API_V1}/admin`, adminRoutes);
 
 // --------------------
 // Swagger Docs

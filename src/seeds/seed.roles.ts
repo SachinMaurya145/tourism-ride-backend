@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import { UserModel } from '../modules/auth/auth.model';
 
-const MONGO_URI = 'mongodb://127.0.0.1:27017/tourism-ride';
+const MONGO_URI = 'mongodb://localhost:27017/tourismRideDB';
 
 const users = [
   {

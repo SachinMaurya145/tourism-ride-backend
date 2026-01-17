@@ -6,6 +6,69 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "strict": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@config": [
+        "config"
+      ],
+      "@config/*": [
+        "config/*"
+      ],
+      "@constants": [
+        "constants"
+      ],
+      "@constants/*": [
+        "constants/*"
+      ],
+      "@middlewares": [
+        "middlewares"
+      ],
+      "@middlewares/*": [
+        "middlewares/*"
+      ],
+      "@modules": [
+        "modules"
+      ],
+      "@modules/*": [
+        "modules/*"
+      ],
+      "@utils": [
+        "utils"
+      ],
+      "@utils/*": [
+        "utils/*"
+      ],
+      "@types": [
+        "types"
+      ],
+      "@types/*": [
+        "types/*"
+      ],
+      "@jobs": [
+        "jobs"
+      ],
+      "@jobs/*": [
+        "jobs/*"
+      ],
+      "@seeds": [
+        "seeds"
+      ],
+      "@seeds/*": [
+        "seeds/*"
+      ],
+      "@sockets": [
+        "sockets"
+      ],
+      "@sockets/*": [
+        "sockets/*"
+      ],
+      "@swagger": [
+        "swagger"
+      ],
+      "@swagger/*": [
+        "swagger/*"
+      ]
+    }
   }
 }
